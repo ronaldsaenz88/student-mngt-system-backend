@@ -51,6 +51,41 @@ def get_students():
         # Handle any other exception
         return jsonify({'error': f'An error occurred: {e}'})
 
+# Create a new student
+@app.route('/api/create_student', methods=['POST'])
+def create_student():
+    try:
+        data_student = request.get_json()
+
+        if data_student and \
+           'firstName' in data_student and 'familyName' in data_student and \
+           'dateOfBirth' in data_student and 'email' in data_student and \
+           data_student['firstName'] and data_student['firstName'] != "" and \
+           data_student['familyName'] and data_student['familyName'] != "" and \
+           data_student['dateOfBirth'] and data_student['dateOfBirth'] != "" and \
+           data_student['email'] and data_student['email'] != "":
+
+            student = {
+                'firstName': data_student['firstName'],
+                'familyName': data_student['familyName'],
+                'dateOfBirth': data_student['dateOfBirth'],
+                'email': data_student['email'],
+                'status': 'ACTIVE'
+            }
+
+            result = mongo.db.students.insert_one(student)
+            return jsonify({
+                'message': 'A new student record was created successfully', 
+                'id': str(result.inserted_id)
+            })
+        else:
+            return jsonify({
+                'error': 'All fields (firstName, familyName, dateOfBirth, email) are required'
+            })
+    except Exception as e:
+        # Handle any other exception
+        return jsonify({'error': f'An error occurred: {e}'})
+
 # Get all courses
 @app.route('/api/get_courses', methods=['GET'])
 def get_courses():
@@ -70,7 +105,6 @@ def get_courses():
     except Exception as e:
         # Handle any other exception
         return jsonify({'error': f'An error occurred: {e}'})
-
 
 # Get all results
 @app.route('/api/get_results', methods=['GET'])
