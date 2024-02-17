@@ -201,14 +201,13 @@ def delete_course(course_id):
 def get_results():
     try:
         # Get all results from MongoDB filtering courses and students with status = ACTIVE
+
         results = mongo.db.results.aggregate([
             {
                 '$lookup': {
                     'from': 'courses',
-                    'let': {'courseId': '$courseId'},
-                    'pipeline': [
-                        {'$match': {'$expr': {'$and': [{'$eq': ['$_id', '$$courseId']}, {'status': 'ACTIVE'}]}}}
-                    ],
+                    'localField': 'courseId',
+                    'foreignField': '_id',
                     'as': 'course'
                 }
             },
@@ -218,10 +217,8 @@ def get_results():
             {
                 '$lookup': {
                     'from': 'students',
-                    'let': {'studentId': '$studentId'},
-                    'pipeline': [
-                        {'$match': {'$expr': {'$and': [{'$eq': ['$_id', '$$studentId']}, {'status': 'ACTIVE'}]}}}
-                    ],
+                    'localField': 'studentId',
+                    'foreignField': '_id',
                     'as': 'student'
                 }
             },
@@ -229,9 +226,17 @@ def get_results():
                 '$unwind': '$student'
             },
             {
+                '$match': {
+                    'course.status': 'ACTIVE',
+                    'student.status': 'ACTIVE'
+                }
+            },
+            {
                 '$project': {
                     '_id': {'$toString': '$_id'},
                     'courseName': '$course.courseName',
+                    'firstName': '$student.firstName',
+                    'familyName': '$student.familyName',
                     'studentName': {
                         '$concat': ['$student.firstName', ' ', '$student.familyName']
                     },
