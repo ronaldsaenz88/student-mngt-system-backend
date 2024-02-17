@@ -1,5 +1,7 @@
 Flask
 Flask-PyMongo
+pymongo
+pymongo[zstd]
+pymongo[srv]
 flask_cors
 gunicorn
-bson
