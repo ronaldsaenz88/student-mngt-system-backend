@@ -16,9 +16,18 @@ app.config['MONGO_URI'] = mongo_uri
 mongo = PyMongo(app)
 
 # Function to format date in mm-dd-yyyy
-def format_date(date_str):
+def format_date_from_db(date_str):
     try:
         return date_str.strftime('%m-%d-%Y')
+    except ValueError as e:
+        # Handle the ValueError (incorrect date format)
+        return f'Error: {e}'
+
+# Function to format date in mm-dd-yyyy
+def format_date_to_db(date_str):
+    try:
+        # Convert date string to datetime object
+        return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%fZ')
     except ValueError as e:
         # Handle the ValueError (incorrect date format)
         return f'Error: {e}'
@@ -40,7 +49,7 @@ def get_students():
                 'firstName': student['firstName'],
                 'familyName': student['familyName'],
                 'fullName': student['firstName'] + " " + student['familyName'],
-                'dateOfBirth': format_date(student['dateOfBirth']),
+                'dateOfBirth': format_date_from_db(student['dateOfBirth']),
                 'email': student['email'],
                 'status': student['status']
             }
@@ -64,11 +73,12 @@ def create_student():
            data_student['familyName'] and data_student['familyName'] != "" and \
            data_student['dateOfBirth'] and data_student['dateOfBirth'] != "" and \
            data_student['email'] and data_student['email'] != "":
+ 
 
             student = {
                 'firstName': data_student['firstName'],
                 'familyName': data_student['familyName'],
-                'dateOfBirth': data_student['dateOfBirth'],
+                'dateOfBirth': format_date_to_db(data_student['dateOfBirth']),
                 'email': data_student['email'],
                 'status': 'ACTIVE'
             }
