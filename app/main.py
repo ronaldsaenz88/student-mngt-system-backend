@@ -27,7 +27,7 @@ def format_date_from_db(date_str):
 def format_date_to_db(date_str):
     try:
         # Convert date string to datetime object
-        return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%fZ')
+        return datetime.strptime(date_str, '%m-%d-%Y')
     except ValueError as e:
         # Handle the ValueError (incorrect date format)
         return f'Error: {e}'
