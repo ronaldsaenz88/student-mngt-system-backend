@@ -116,6 +116,35 @@ def get_courses():
         # Handle any other exception
         return jsonify({'error': f'An error occurred: {e}'})
 
+
+# Create a new course
+@app.route('/api/create_course', methods=['POST'])
+def create_course():
+    try:
+        data_course = request.get_json()
+
+        if data_course and \
+           'courseName' in data_course and \
+           data_course['courseName'] and data_course['courseName'] != "":
+ 
+            course = {
+                'courseName': data_course['courseName'],
+                'status': 'ACTIVE'
+            }
+
+            result = mongo.db.courses.insert_one(course)
+            return jsonify({
+                'message': 'A new course record was created successfully', 
+                'id': str(result.inserted_id)
+            })
+        else:
+            return jsonify({
+                'error': 'All fields (courseName) are required'
+            })
+    except Exception as e:
+        # Handle any other exception
+        return jsonify({'error': f'An error occurred: {e}'})
+
 # Get all results
 @app.route('/api/get_results', methods=['GET'])
 def get_results():
