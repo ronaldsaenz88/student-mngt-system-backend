@@ -109,10 +109,13 @@ def delete_student(student_id):
         # Convert string ID to ObjectId
         student_object_id = ObjectId(student_id)
 
-        # Delete the student by ID
-        result = mongo.db.students.delete_one({'_id': student_object_id})
+        # Delete the student by ID - Update Status to INACTIVE
+        result = mongo.db.students.update_one(
+            {'_id': student_object_id},
+            {'$set': {'status': 'INACTIVE'}}
+        )
 
-        if result.deleted_count > 0:
+        if result.modified_count  > 0:
             return jsonify({'message': 'Student deleted successfully'})
         else:
             return jsonify({'error': 'Student not found'})
@@ -178,10 +181,13 @@ def delete_course(course_id):
         # Convert string ID to ObjectId
         course_object_id = ObjectId(course_id)
 
-        # Delete the course by ID
-        result = mongo.db.courses.delete_one({'_id': course_object_id})
+        # Delete the course by ID - Update Status to INACTIVE
+        result = mongo.db.courses.update_one(
+            {'_id': course_object_id},
+            {'$set': {'status': 'INACTIVE'}}
+        )
 
-        if result.deleted_count > 0:
+        if result.modified_count  > 0:
             return jsonify({'message': 'Course deleted successfully'})
         else:
             return jsonify({'error': 'Course not found'})
