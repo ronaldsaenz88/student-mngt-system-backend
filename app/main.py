@@ -3,6 +3,8 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from flask_cors import CORS, cross_origin
+from bson import ObjectId
+
 
 # Your API definition
 app = Flask(__name__)
@@ -67,13 +69,12 @@ def create_student():
         data_student = request.get_json()
 
         if data_student and \
-           'firstName' in data_student and 'familyName' in data_student and \
-           'dateOfBirth' in data_student and 'email' in data_student and \
-           data_student['firstName'] and data_student['firstName'] != "" and \
-           data_student['familyName'] and data_student['familyName'] != "" and \
-           data_student['dateOfBirth'] and data_student['dateOfBirth'] != "" and \
-           data_student['email'] and data_student['email'] != "":
- 
+            'firstName' in data_student and 'familyName' in data_student and \
+            'dateOfBirth' in data_student and 'email' in data_student and \
+            data_student['firstName'] and data_student['firstName'] != "" and \
+            data_student['familyName'] and data_student['familyName'] != "" and \
+            data_student['dateOfBirth'] and data_student['dateOfBirth'] != "" and \
+            data_student['email'] and data_student['email'] != "":
 
             student = {
                 'firstName': data_student['firstName'],
@@ -124,8 +125,8 @@ def create_course():
         data_course = request.get_json()
 
         if data_course and \
-           'courseName' in data_course and \
-           data_course['courseName'] and data_course['courseName'] != "":
+            'courseName' in data_course and \
+            data_course['courseName'] and data_course['courseName'] != "":
  
             course = {
                 'courseName': data_course['courseName'],
@@ -191,6 +192,45 @@ def get_results():
 
         result_list = list(results)
         return jsonify({'results': result_list})
+    except Exception as e:
+        # Handle any other exception
+        return jsonify({'error': f'An error occurred: {e}'})
+
+
+# Create a new result
+@app.route('/api/create_result', methods=['POST'])
+def create_result():
+    try:
+        data_result = request.get_json()
+
+        if data_result and \
+            'courseId' in data_result and 'studentId' in data_result and \
+            'score' in data_result and \
+            data_result['courseId'] and data_result['courseId'] != "" and \
+            data_result['studentId'] and data_result['studentId'] != "" and \
+            data_result['score'] and data_result['score'] != "" and \
+            data_result['score'] in ("A", "B", "C", "D", "E", "F"):
+
+            # Convert string IDs to ObjectId
+            course_id = ObjectId(data_result['courseId'])
+            student_id = ObjectId(data_result['studentId'])
+
+            new_result = {
+                'courseId': course_id,
+                'studentId': student_id,
+                'score': data_result['score'],
+                'status': 'ACTIVE'
+            }
+
+            result = mongo.db.results.insert_one(new_result)
+            return jsonify({
+                'message': 'A new result record was created successfully', 
+                'id': str(result.inserted_id)
+            })
+        else:
+            return jsonify({
+                'error': 'All fields (courseName) are required'
+            })
     except Exception as e:
         # Handle any other exception
         return jsonify({'error': f'An error occurred: {e}'})
