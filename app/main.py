@@ -17,6 +17,7 @@ mongo_uri += os.environ.get('DB_URL')+'/'+os.environ.get('DB_NAME')+'?retryWrite
 app.config['MONGO_URI'] = mongo_uri
 mongo = PyMongo(app)
 
+
 # Function to format date in mm-dd-yyyy
 def format_date_from_db(date_str):
     try:
@@ -24,6 +25,7 @@ def format_date_from_db(date_str):
     except ValueError as e:
         # Handle the ValueError (incorrect date format)
         return f'Error: {e}'
+
 
 # Function to format date in mm-dd-yyyy
 def format_date_to_db(date_str):
@@ -33,6 +35,7 @@ def format_date_to_db(date_str):
     except ValueError as e:
         # Handle the ValueError (incorrect date format)
         return f'Error: {e}'
+
 
 @app.route("/")
 def home():
@@ -61,6 +64,7 @@ def get_students():
     except Exception as e:
         # Handle any other exception
         return jsonify({'error': f'An error occurred: {e}'})
+
 
 # Create a new student
 @app.route('/api/create_student', methods=['POST'])
@@ -96,6 +100,26 @@ def create_student():
     except Exception as e:
         # Handle any other exception
         return jsonify({'error': f'An error occurred: {e}'})
+
+
+# Delete a student by ID
+@app.route('/api/delete_student/<string:student_id>', methods=['DELETE'])
+def delete_student(student_id):
+    try:
+        # Convert string ID to ObjectId
+        student_object_id = ObjectId(student_id)
+
+        # Delete the student by ID
+        result = mongo.db.students.delete_one({'_id': student_object_id})
+
+        if result.deleted_count > 0:
+            return jsonify({'message': 'Student deleted successfully'})
+        else:
+            return jsonify({'error': 'Student not found'})
+    except Exception as e:
+        # Handle any other exception
+        return jsonify({'error': f'An error occurred: {e}'})
+
 
 # Get all courses
 @app.route('/api/get_courses', methods=['GET'])
@@ -145,6 +169,26 @@ def create_course():
     except Exception as e:
         # Handle any other exception
         return jsonify({'error': f'An error occurred: {e}'})
+
+
+# Delete a course by ID
+@app.route('/api/delete_course/<string:course_id>', methods=['DELETE'])
+def delete_course(course_id):
+    try:
+        # Convert string ID to ObjectId
+        course_object_id = ObjectId(course_id)
+
+        # Delete the course by ID
+        result = mongo.db.courses.delete_one({'_id': course_object_id})
+
+        if result.deleted_count > 0:
+            return jsonify({'message': 'Course deleted successfully'})
+        else:
+            return jsonify({'error': 'Course not found'})
+    except Exception as e:
+        # Handle any other exception
+        return jsonify({'error': f'An error occurred: {e}'})
+
 
 # Get all results
 @app.route('/api/get_results', methods=['GET'])
@@ -234,6 +278,7 @@ def create_result():
     except Exception as e:
         # Handle any other exception
         return jsonify({'error': f'An error occurred: {e}'})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
